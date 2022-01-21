@@ -44,17 +44,17 @@
 -----------------------------------------------------------
 Всё успешно установил:
 
-1. VirtualBox:
+**1. VirtualBox:**
 ```
 dmitry@Lenovo-B50:~$ virtualbox --help | head -n 1 | awk '{print $NF}'
 v6.1.32
 ```
-2. Vagrant:
+**2. Vagrant:**
 ```
 dmitry@Lenovo-B50:~$ vagrant --version
 Vagrant 2.2.19
 ```
-3. Ansible
+**3. Ansible**
 ```
 dmitry@Lenovo-B50:~$ ansible --version
 ansible [core 2.12.1]
