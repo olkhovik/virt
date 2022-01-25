@@ -19,13 +19,13 @@ Hey, Netology
 _Опубликуйте созданный форк в своем репозитории и предоставьте ответ в виде ссылки на https://hub.docker.com/username_repo._
 
 -----------------------------------------------------------
-1. Dockerfile:
+1. **Dockerfile:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03/nginx$ cat Dockerfile
 FROM nginx:1.21.5
 COPY index.html /usr/share/nginx/html/index.html
 ```
-2. Сборка Docker образа:
+2. **Сборка Docker образа:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03/nginx$ docker build -t endlessoda/05-virt-3-nginx:1.21.5 .
 Sending build context to Docker daemon  3.072kB
@@ -45,14 +45,17 @@ Step 2/2 : COPY index.html /usr/share/nginx/html/index.html
 Successfully built 05ac4308e540
 Successfully tagged endlessoda/05-virt-3-nginx:1.21.5
 ```
-3. Запускаю Docker контейнер:
-```dmitry@Lenovo-B50:~/Virt/05-virt-03/nginx$ docker run --rm -d --name nginx -p 8080:80 endlessoda/05-virt-3-nginx:1.21.5
+3. **Запускаю Docker контейнер и проверяю его работу:**
+```
+dmitry@Lenovo-B50:~/Virt/05-virt-03/nginx$ docker run --rm -d --name nginx -p 8080:80 endlessoda/05-virt-3-nginx:1.21.5
 22b57efd17e04119434df512f832658030f4c365cd8f53150a6b34c17f2abdb6
 dmitry@Lenovo-B50:~/Virt/05-virt-03/nginx$ docker ps
 CONTAINER ID   IMAGE                               COMMAND                  CREATED          STATUS          PORTS                                   NAMES
 22b57efd17e0   endlessoda/05-virt-3-nginx:1.21.5   "/docker-entrypoint.…"   28 seconds ago   Up 27 seconds   0.0.0.0:8080->80/tcp, :::8080->80/tcp   nginx
 ```
-4. Выгружаю Docker образ на DockerHub:
+![](image/5.3_1.png)
+
+4. **Выгружаю Docker образ на DockerHub:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03/nginx$ docker push endlessoda/05-virt-3-nginx:1.21.5
 The push refers to repository [docker.io/endlessoda/05-virt-3-nginx]
@@ -65,7 +68,7 @@ e379e8aedd4d: Mounted from library/nginx
 2edcec3590a4: Mounted from library/nginx
 1.21.5: digest: sha256:fea6a0369dd05f5c15a6c58e082773b6e762a08ba2fa9a8dd2b8067b8779c5d4 size: 1777
 ```
-5. Ссылка на DockerHub: https://hub.docker.com/r/endlessoda/05-virt-3-nginx
+5. **Ссылка на DockerHub:** https://hub.docker.com/r/endlessoda/05-virt-3-nginx
 
 
 
@@ -133,7 +136,7 @@ Docker подойдёт для этой задачи хорошо. Развор�
 - Добавьте еще один файл в папку `/data` на хостовой машине;
 - Подключитесь во второй контейнер и отобразите листинг и содержание файлов в `/data` контейнера.
 -------------------------------------------------------------
-1. Запускаю контейнеры:
+1. **Запускаю контейнеры:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03$ docker run -it --rm -d --name centos -v $(pwd)/data:/data centos
 Unable to find image 'centos:latest' locally
@@ -154,17 +157,17 @@ CONTAINER ID   IMAGE     COMMAND       CREATED          STATUS          PORTS   
 33b7a3fc8bc5   debian    "bash"        2 seconds ago    Up 1 second               debian
 0e946f10d4c2   centos    "/bin/bash"   15 seconds ago   Up 13 seconds             centos
 ```
-2. Подключаюсь к первому контейнеру `centos` и создаю файл:
+2. **Подключаюсь к первому контейнеру `centos` и создаю файл:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03$ docker exec -it centos bash
 [root@0e946f10d4c2 /]# echo "Hello from CentOS!" > /data/centos
 [root@0e946f10d4c2 /]# exit
 ```
-3. Создаю на хостовой машине файл:
+3. **Создаю на хостовой машине файл:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03$ echo "Hello from Host!" > data/host
 ```
-4. Подключаюсь ко второму контейнеру `debian` и смотрю в директорию `/data`:
+4. **Подключаюсь ко второму контейнеру `debian` и смотрю в директорию `/data`:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03$ docker exec -it debian bash
 root@33b7a3fc8bc5:/# ls -lha /data
@@ -182,7 +185,7 @@ drwxr-xr-x 1 root root 4.0K Jan 25 11:37 ..
 Соберите Docker образ с Ansible, загрузите на Docker Hub и пришлите ссылку вместе с остальными ответами к задачам.
 
 ----------------------------------------------
-1. Dockerfile:
+1. **Dockerfile:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03/ansible$ cat Dockerfile
 FROM alpine:3.15
@@ -225,7 +228,7 @@ WORKDIR /ansible
 
 CMD [ "ansible-playbook", "--version" ]
 ```
-2. Сборка Docker образа:
+2. **Сборка Docker образа:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03/ansible$ docker build -t endlessoda/05-virt-3-ansible:2.12.1 .
 Sending build context to Docker daemon   2.56kB
@@ -254,7 +257,7 @@ Removing intermediate container 9a6e21e9a7c1
 Successfully built 5d9ac9c71646
 Successfully tagged endlessoda/05-virt-3-ansible:2.12.1
 ```
-3. Выгружаю Docker образ на DockerHub:
+3. **Выгружаю Docker образ на DockerHub:**
 ```
 dmitry@Lenovo-B50:~/Virt/05-virt-03/ansible$ docker login -u endlessoda
 Password:
@@ -266,6 +269,6 @@ a200848efa73: Pushed
 8d3ac3489996: Mounted from library/alpine
 2.12.1: digest: sha256:dfc1d43276bd4f2c59abc8532f61be025ec7063800090d46e8c39cc8213e088d size: 947
 ```
-4. Ссылка на DockerHub: https://hub.docker.com/r/endlessoda/05-virt-3-ansible
+4. **Ссылка на DockerHub:** https://hub.docker.com/r/endlessoda/05-virt-3-ansible
 
 
