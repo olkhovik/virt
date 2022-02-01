@@ -32,6 +32,7 @@
 ```
 docker node ls
 ```
+---
 
 ## _Задача №3_
 
@@ -41,6 +42,7 @@ docker node ls
 ```
 docker service ls
 ```
+---
 
 ## _Задача №4 (*)_
 
@@ -49,4 +51,5 @@ docker service ls
 # см.документацию: https://docs.docker.com/engine/swarm/swarm_manager_locking/
 docker swarm update --autolock=true
 ```
+---
 
