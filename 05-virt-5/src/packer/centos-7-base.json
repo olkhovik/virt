@@ -2,7 +2,7 @@
   "builders": [
     {
       "disk_type": "network-nvme",
-      "folder_id": "",
+      "folder_id": "b1giran3f1dor113bp7u",
       "image_description": "by packer",
       "image_family": "centos",
       "image_name": "centos-7-base",
