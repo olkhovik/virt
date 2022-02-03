@@ -34,14 +34,16 @@ docker node ls
 ```
 ---
 ```
+dmitry@Lenovo-B50:~/netology/virt/05-virt-5/src/terraform$ ssh centos@84.201.174.16
+[centos@node01 ~]$ sudo -i
 [root@node01 ~]# docker node ls
 ID                            HOSTNAME             STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
-w6ybewkgnlt5g7i4q3hgyme61 *   node01.netology.yc   Ready     Active         Leader           20.10.12
-ekfi92uhqlxxnadutgolexm8o     node02.netology.yc   Ready     Active         Reachable        20.10.12
-mnxh7ih941g5w3ptny32ea647     node03.netology.yc   Ready     Active         Reachable        20.10.12
-ubldfkmmjfx8z029hkpfzozr6     node04.netology.yc   Ready     Active                          20.10.12
-2svyltmuh4d2hsnpu7ong2eb7     node05.netology.yc   Ready     Active                          20.10.12
-bpbcwmpihvd2f48vuo3bb2nd9     node06.netology.yc   Ready     Active                          20.10.12
+usddpi0msuu5vemrc2vj7yo35 *   node01.netology.yc   Ready     Active         Leader           20.10.12
+nt0a18547onr23k82r6l0ehcd     node02.netology.yc   Ready     Active         Reachable        20.10.12
+yj4axrm4qehoc0jrxu6ue84m9     node03.netology.yc   Ready     Active         Reachable        20.10.12
+mkc0965rjwlavnqqhuhghkne7     node04.netology.yc   Ready     Active                          20.10.12
+hhhqt57qewbap7ij3vt2p7kgg     node05.netology.yc   Ready     Active                          20.10.12
+xbgwuimk4j508zshznxgifgh5     node06.netology.yc   Ready     Active                          20.10.12
 ```
 
 ## _Задача №3_
@@ -55,18 +57,18 @@ docker service ls
 ---
 ```
 [root@node01 ~]# docker stack ls
-NAME               SERVICES    ORCHESTRATOR
-swarm_monitoring   8           Swarm
+NAME               SERVICES   ORCHESTRATOR
+swarm_monitoring   8          Swarm
 [root@node01 ~]# docker service ls
 ID             NAME                                MODE         REPLICAS   IMAGE                                          PORTS
-z6nu16w6zpug   swarm_monitoring_alertmanager       replicated   1/1        stefanprodan/swarmprom-alertmanager:v0.14.0    
-jud7cb3gfypa   swarm_monitoring_caddy              replicated   1/1        stefanprodan/caddy:latest                      *:3000->3000/tcp, *:9090->9090/tcp, *:9093-9094->9093-9094/tcp
-363o2ywxvq8r   swarm_monitoring_cadvisor           global       6/6        google/cadvisor:latest                         
-56ij34t47v6t   swarm_monitoring_dockerd-exporter   global       6/6        stefanprodan/caddy:latest                      
-yxr7vbw9obd9   swarm_monitoring_grafana            replicated   1/1        stefanprodan/swarmprom-grafana:5.3.4           
-xamzy4a9g8pr   swarm_monitoring_node-exporter      global       6/6        stefanprodan/swarmprom-node-exporter:v0.16.0   
-gsmotafkyd7k   swarm_monitoring_prometheus         replicated   1/1        stefanprodan/swarmprom-prometheus:v2.5.0       
-aq6yo2py6rs3   swarm_monitoring_unsee              replicated   1/1        cloudflare/unsee:v0.8.0 
+7efhoqlu0v1y   swarm_monitoring_alertmanager       replicated   1/1        stefanprodan/swarmprom-alertmanager:v0.14.0
+db02hx3hri9t   swarm_monitoring_caddy              replicated   1/1        stefanprodan/caddy:latest                      *:3000->3000/tcp, *:9090->9090/tcp, *:9093-9094->9093-9094/tcp
+0g8d2o5vk4lc   swarm_monitoring_cadvisor           global       6/6        google/cadvisor:latest
+hxr9qrtcety4   swarm_monitoring_dockerd-exporter   global       6/6        stefanprodan/caddy:latest
+bnme001umo8f   swarm_monitoring_grafana            replicated   1/1        stefanprodan/swarmprom-grafana:5.3.4
+g6x7pks2xn0c   swarm_monitoring_node-exporter      global       6/6        stefanprodan/swarmprom-node-exporter:v0.16.0
+atr192ydpsxn   swarm_monitoring_prometheus         replicated   1/1        stefanprodan/swarmprom-prometheus:v2.5.0
+omtcpxcxxaly   swarm_monitoring_unsee              replicated   1/1        cloudflare/unsee:v0.8.0
 ```
 
 
@@ -78,19 +80,72 @@ aq6yo2py6rs3   swarm_monitoring_unsee              replicated   1/1        cloud
 docker swarm update --autolock=true
 ```
 ---
+- выполняю `docker swarm update --autolock=true`:
 ```
-[root@node02 ~]# docker node ls
+[root@node01 ~]# docker swarm update --autolock=true
+Swarm updated.
+To unlock a swarm manager after it restarts, run the `docker swarm unlock`
+command and provide the following key:
+
+    SWMKEY-1-H2nVDjXrwyRaGklPW3dDQ0bIWn4paaC3kbNE0hJ7EPM
+
+Please remember to store this key in a password manager, since without it you
+will not be able to restart the manager.
+[root@node01 ~]# exit
+logout
+[centos@node01 ~]$ exit
+logout
+Connection to 84.201.174.16 closed.
+```
+- перезагрузил node03:
+```
+dmitry@Lenovo-B50:~/netology/virt/05-virt-5/src/terraform$ ssh centos@84.252.128.167
+[centos@node03 ~]$ sudo shutdown -r now
+Connection to 84.252.128.167 closed by remote host.
+Connection to 84.252.128.167 closed.
+dmitry@Lenovo-B50:~/netology/virt/05-virt-5/src/terraform$
+```
+- смотрю доступность нод из лидера:
+```
+dmitry@Lenovo-B50:~/netology/virt/05-virt-5/src/terraform$ ssh centos@84.201.174.16
+[centos@node01 ~]$ sudo -i
+[root@node01 ~]# docker node ls
+ID                            HOSTNAME             STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+usddpi0msuu5vemrc2vj7yo35 *   node01.netology.yc   Ready     Active         Leader           20.10.12
+nt0a18547onr23k82r6l0ehcd     node02.netology.yc   Ready     Active         Reachable        20.10.12
+yj4axrm4qehoc0jrxu6ue84m9     node03.netology.yc   Down      Active         Unreachable      20.10.12
+mkc0965rjwlavnqqhuhghkne7     node04.netology.yc   Ready     Active                          20.10.12
+hhhqt57qewbap7ij3vt2p7kgg     node05.netology.yc   Ready     Active                          20.10.12
+xbgwuimk4j508zshznxgifgh5     node06.netology.yc   Ready     Active                          20.10.12
+[root@node01 ~]# exit
+logout
+[centos@node01 ~]$ exit
+logout
+Connection to 84.201.174.16 closed.
+```
+- захожу на ноду `node03`, смотрю доступность нод из неё, получаю предложение ввести `unlock key`:
+```
+dmitry@Lenovo-B50:~/netology/virt/05-virt-5/src/terraform$ ssh centos@84.252.128.167
+[centos@node03 ~]$ sudo -i
+[root@node03 ~]# docker node ls
 Error response from daemon: Swarm is encrypted and needs to be unlocked before it can be used. Please use "docker swarm unlock" to unlock it.
 [root@node03 ~]# docker swarm unlock
-Please enter unlock key: 
+Please enter unlock key:
 [root@node03 ~]# docker node ls
 ID                            HOSTNAME             STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
-w6ybewkgnlt5g7i4q3hgyme61     node01.netology.yc   Ready     Active         Leader           20.10.12
-...
+usddpi0msuu5vemrc2vj7yo35     node01.netology.yc   Ready     Active         Leader           20.10.12
+nt0a18547onr23k82r6l0ehcd     node02.netology.yc   Ready     Active         Reachable        20.10.12
+yj4axrm4qehoc0jrxu6ue84m9 *   node03.netology.yc   Ready     Active         Reachable        20.10.12
+mkc0965rjwlavnqqhuhghkne7     node04.netology.yc   Ready     Active                          20.10.12
+hhhqt57qewbap7ij3vt2p7kgg     node05.netology.yc   Ready     Active                          20.10.12
+xbgwuimk4j508zshznxgifgh5     node06.netology.yc   Ready     Active                          20.10.12
+[root@node03 ~]# exit
 ```
+
+
 **`autolock`** - это функция, которая защищает Docker Swarm кластер от несанкционированного доступа к файлам нод.
 
-При загрузке/перезапуске Docker в память каждой `manager` ноды загружается как ключ TLS, используемый для шифрования связи между нодами Docker Swarm, так и ключ, используемый для шифрования и расшифровки журналов Raft на диске. `autolock` защищает эти ключи. 
+При загрузке/перезапуске управляющих нод, в память каждой `manager` ноды загружается как ключ TLS, используемый для шифрования связи между нодами Docker Swarm, так и ключ, используемый для шифрования и расшифровки журналов Raft на диске. `autolock` защищает эти ключи. 
  
 Функция `autolock` потребует вводить ключ разблокировки на `manager` ноде, чтобы она могла заново присоединиться к кластеру, если была перезапущена. Ввод ключа позволит расшифровать журнал Raft и загрузить в память ноды логины, пароли, TLS ключи и сертификаты, SSH ключи, имена баз данных и серверов.
 
