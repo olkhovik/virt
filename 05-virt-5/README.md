@@ -97,7 +97,7 @@ logout
 logout
 Connection to 84.201.174.16 closed.
 ```
-- перезагрузил node03:
+- перезагрузил `node03`:
 ```
 dmitry@Lenovo-B50:~/netology/virt/05-virt-5/src/terraform$ ssh centos@84.252.128.167
 [centos@node03 ~]$ sudo shutdown -r now
