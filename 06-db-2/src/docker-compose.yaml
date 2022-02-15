@@ -1,0 +1,20 @@
+version: '3.6'
+
+volumes:
+  data: {}
+  backup: {}
+
+services:
+
+  postgres:
+    image: postgres:12
+    container_name: psql
+    ports:
+      - "0.0.0.0:5433:5433"
+    volumes:
+      - data:/var/lib/postgresql/data
+      - backup:/media/postgresql/backup
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "netology"
+    restart: always
