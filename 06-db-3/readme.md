@@ -21,17 +21,17 @@
 В следующих заданиях мы будем продолжать работу с данным контейнером.
 
 ---
-Запуск инстанса MySQL:
+**Запуск инстанса MySQL:**
 ```
 dmitry@Lenovo-B50:~/netology/virt/06-db-3/src$ docker run --rm --name mysql8 -e MYSQL_DATABASE=test_db -e MYSQL_ROOT_PASSWORD=netology -v $PWD/backup:/media/mysql/backup -v $PWD/test_data:/var/lib/mysql -v $PWD/config:/etc/mysql -p 3306:3306 -d mysql:8
 540a82a3d7ccb28da591c08eadc82351bc6fdac0ce639ba40105d8ecc658bb4d
 ```
-Раскатываем бэкап БД:
+**Раскатываю бэкап БД:**
 ```
 dmitry@Lenovo-B50:~/netology/virt/06-db-3/src$ cat backup/test_dump.sql | docker exec -i mysql8 /usr/bin/mysql -u root --password=netology test_db
 mysql: [Warning] Using a password on the command line interface can be insecure.
 ```
-Захожу в управляющую консоль `mysql` внутри контейнера:
+**Захожу в управляющую консоль `mysql` внутри контейнера:**
 ```
 dmitry@Lenovo-B50:~/netology/virt/06-db-3/src$ docker exec -it mysql8  bash
 root@540a82a3d7cc:/# mysql -uroot -p
@@ -50,13 +50,13 @@ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
 mysql>
 ```
-Команда для выдачи статуса БД - `\s`:
+**Команда для выдачи статуса БД - `\s`:**
 ```
 mysql> \s
 --------------
 mysql  Ver 8.0.28 for Linux on x86_64 (MySQL Community Server - GPL)
 ```
-Подключаюсь к восстановленой БД и смотрю список таблиц в ней:
+**Подключаюсь к восстановленой БД и смотрю список таблиц в ней:**
 ```
 mysql> use test_db;
 Reading table information for completion of table and column names
@@ -71,7 +71,7 @@ mysql> show tables;
 +-------------------+
 1 row in set (0.00 sec)
 ```
-Количество записей с `price` > 300:
+**Количество записей с `price` > 300:**
 ```
 mysql> select * from orders where price > 300;
 +----+----------------+-------+
@@ -107,17 +107,17 @@ mysql> select count(*) from orders where price > 300;
 **приведите в ответе к задаче**.
 
 ---
-Создаю нового пользователя:
+**Создаю нового пользователя:**
 ```
 mysql> CREATE USER 'test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'test-pass' WITH MAX_CONNECTIONS_PER_HOUR 100 PASSWORD EXPIRE INTERVAL 180 DAY FAILED_LOGIN_ATTEMPTS 3 PASSWORD_LOCK_TIME 2 ATTRIBUTE '{"first_name":"James", "last_name":"Pretty"}';
 Query OK, 0 rows affected (0.02 sec)
 ```
-Предоставляю привелегии пользователю `test` на операции SELECT базы `test_db`:
+**Предоставляю привелегии пользователю `test` на операции SELECT базы `test_db`:**
 ```
 mysql> GRANT SELECT on test_db.* to 'test'@'localhost';
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 ```
-Данные по пользователю `test`:
+**Данные по пользователю `test`:**
 ```
 mysql> SELECT * from INFORMATION_SCHEMA.USER_ATTRIBUTES where user = 'test';
 +------+-----------+------------------------------------------------+
@@ -148,7 +148,7 @@ mysql> SELECT User, max_connections, password_lifetime, User_attributes  FROM my
 - на `InnoDB`
 
 ---
-Используется engine `InnoDB`:
+**Используется engine `InnoDB`:**
 ```
 mysql> SELECT table_schema,table_name,engine FROM information_schema.tables WHERE table_schema = DATABASE();
 +--------------+------------+--------+
@@ -158,7 +158,7 @@ mysql> SELECT table_schema,table_name,engine FROM information_schema.tables WHER
 +--------------+------------+--------+
 1 row in set (0.00 sec)
 ```
-Меняю `engine`:
+**Меняю `engine`:**
 ```
 mysql> set profiling = 1;
 Query OK, 0 rows affected, 1 warning (0.00 sec)
@@ -208,7 +208,7 @@ mysql> SHOW PROFILES;
 
 ---
 
-Изменённый [`my.cnf`](https://github.com/olkhovik/virt/blob/main/06-db-3/src/config/my.cnf):
+**Изменённый [`my.cnf`](https://github.com/olkhovik/virt/blob/main/06-db-3/src/config/my.cnf):**
 ```
 root@540a82a3d7cc:/# cat /etc/mysql/my.cnf
 ---
