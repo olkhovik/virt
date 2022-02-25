@@ -1,0 +1,3 @@
+*.tar.gz
+elasticsearch-*
+elasticsearch*.log
