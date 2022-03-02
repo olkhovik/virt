@@ -200,8 +200,99 @@ dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic curl 'http://
 
 ---
 
-### Как cдавать задание
+- запрос API:
+```
 
-Выполненное домашнее задание пришлите ссылкой на .md-файл в вашем репозитории.
+curl -X PUT "localhost:9200/_snapshot/netology_backup?pretty" -H 'Content-Type: application/json' -d'
+{
+  "type": "fs",
+  "settings": {
+    "location": "/usr/src/elasticsearch/elasticsearch-7.10.2/snapshots",
+    "compress": true
+  }
+}'
+```
+- результат вызова API для созданного репозитория:
+```
+{
+  "acknowledged" : true
+}
+```
+- создаю индекс `test` с 0 реплик и 1 шардом:
+```
+curl -X PUT -H "Content-Type:application/json" -d '{"settings": {"index": {"number_of_shards": 1, "number_of_replicas": 0}}}' http://localhost:9200/test
 
----
+{"acknowledged":true,"shards_acknowledged":true,"index":"test"}
+```
+- список индексов:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic_2 curl http://localhost:9200/_cat/indices
+green  open   .geoip_databases xCjT_XLWT96qt1-Kp4xXgQ   1   0         42            0     41.1mb         41.1mb
+green  open   test             2ocwHrSiQtqAIvuX04yt7g   1   0          0            0       226b           226b
+```
+- cоздаю snapshot состояния кластера elasticsearch:
+```
+curl -X PUT -H "Content-Type:application/json" http://localhost:9200/_snapshot/netology_backup/snapshot_1?wait_for_completion=true
+
+{
+  "snapshot": {
+    "snapshot": "snapshot_1",
+    "uuid": "TdQTCV2iTE2yfoL0fbBx3g",
+    "version_id": 7100299,
+    "version": "7.10.2",
+    "indices": [
+      "test"
+    ],
+    "data_streams": [],
+    "include_global_state": true,
+    "state": "SUCCESS",
+    "start_time": "2022-03-02T09:40:30.920Z",
+    "start_time_in_millis": 0933020030920,
+    "end_time": "2022-03-02T09:40:30.920Z",
+    "end_time_in_millis": 0933020030920,
+    "duration_in_millis": 0,
+    "failures": [],
+    "shards": {
+      "total": 1,
+      "failed": 0,
+      "successful": 1
+    }
+  }
+}
+```
+- список файлов в директории со snapshotами:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic_2 ls -l /usr/src/elasticsearch/elasticsearch-7.10.2/snapshots/
+total 28
+-rw-r--r-- 1 elasticsearch elasticsearch 1434 Mar 02 09:40 index-0
+-rw-r--r-- 1 elasticsearch elasticsearch    8 Mar 02 09:40 index.latest
+drwxr-xr-x 6 elasticsearch elasticsearch 4096 Mar 02 09:40 indices
+-rw-r--r-- 1 elasticsearch elasticsearch 9737 Mar 02 09:40 meta-TdQTCV2iTE2yfoL0fbBx3g.dat
+-rw-r--r-- 1 elasticsearch elasticsearch  458 Mar 02 09:40 snap-TdQTCV2iTE2yfoL0fbBx3g.dat
+```
+- удаляю индекс `test` и создаю индекс `test-2:
+```
+curl -X DELETE http://localhost:9200/test
+{"acknowledged":true}
+
+curl -X PUT -H "Content-Type:application/json" -d '{"settings": {"index": {"number_of_shards": 1, "number_of_replicas": 0}}}' http://localhost:9200/test-2
+{"acknowledged":true,"shards_acknowledged":true,"index":"test-2"}
+```
+- список индексов:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic_2 curl http://localhost:9200/_cat/indices
+green  open   .geoip_databases xCjT_XLWT96qt1-Kp4xXgQ   1   0         42            0     41.1mb         41.1mb
+green  open   test-2           2NVi48R_QqW73lxawMykRA   1   0          0            0       226b           226b
+```
+- восстанавливаю состояние кластера `elasticsearch` из `snapshot`, созданного ранее:
+```
+curl -X POST http://localhost:9200/_snapshot/netology_backup/snapshot_1/_restore
+{"accepted":true}
+```
+- итоговый список индексов:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic_2 curl http://localhost:9200/_cat/indices
+green  open   .geoip_databases xCjT_XLWT96qt1-Kp4xXgQ   1   0         42            0     41.1mb         41.1mb
+green  open   test-2           2NVi48R_QqW73lxawMykRA   1   0          0            0       226b           226b
+green  open   test             2ocwHrSiQtqAIvuX04yt7g   1   0          0            0       226b           226b
+```
