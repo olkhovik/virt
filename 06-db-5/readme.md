@@ -31,6 +31,52 @@
 
 Далее мы будем работать с данным экземпляром elasticsearch.
 
+---
+- Dockerfile:
+```
+FROM centos:7
+WORKDIR /usr/src/elasticsearch
+RUN yum -y install wget sudo perl-Digest-SHA && wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-linux-x86_64.tar.gz && wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-linux-x86_64.tar.gz.sha512 && shasum -a 512 -c elasticsearch-oss-7.10.2-linux-x86_64.tar.gz.sha512 && tar -xzf elasticsearch-oss-7.10.2-linux-x86_64.tar.gz
+RUN /bin/sh -c 'mkdir /var/lib/elasticsearch && mkdir /var/lib/elasticsearch/logs && mkdir /var/lib/elasticsearch/data && useradd -s /sbin/nologin elastic'
+RUN /bin/sh -c 'rm -f /usr/src/elasticsearch/elasticsearch-7.10.2/config/elasticsearch.yml'
+COPY config/* /usr/src/elasticsearch/elasticsearch-7.10.2/config/
+RUN /bin/sh -c 'chown -R elastic /usr/src/elasticsearch/elasticsearch-7.10.2 && chown -R elastic /var/lib/elasticsearch'
+EXPOSE 9200 9300
+ENTRYPOINT sudo -u elastic /usr/src/elasticsearch/elasticsearch-7.10.2/bin/elasticsearch
+```
+- ссылка на образ в Dockerhub: 
+
+- создаём и запускаем контейнер:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker build -t endlessoda/elastic_netology .
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker run --rm -d --name elastic -p 9200:9200 -p 9300:9300 endlessoda/elastic_netology
+```
+
+- ответ `elasticsearch` на запрос пути `/` в json виде:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic curl -X GET 'localhost:9200/'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   535  100   535    0     0  34999      0 --:--:-- --:--:-- --:--:-- 35666
+{
+  "name" : "netology_test",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "TaE8fSxBQ0a6CzLB4uM9cQ",
+  "version" : {
+    "number" : "7.10.2",
+    "build_flavor" : "oss",
+    "build_type" : "tar",
+    "build_hash" : "747e1cc71def077253878a59143c1f785afa92b9",
+    "build_date" : "2021-01-13T00:42:12.435326Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.7.0",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "You Know, for Search"
+}
+```
+
 ## Задача 2
 
 В этом задании вы научитесь:
@@ -59,6 +105,68 @@
 
 При проектировании кластера elasticsearch нужно корректно рассчитывать количество реплик и шард,
 иначе возможна потеря данных индексов, вплоть до полной, при деградации системы.
+
+---
+- добавляю в `elasticsearch` 3 индекса:
+```
+curl -X PUT -H "Content-Type:application/json" -d '{"settings": {"index": {"number_of_shards": 1, "number_of_replicas": 0}}}' http://localhost:9200/ind-1
+curl -X PUT -H "Content-Type:application/json" -d '{"settings": {"index": {"number_of_shards": 2, "number_of_replicas": 1}}}' http://localhost:9200/ind-2
+curl -X PUT -H "Content-Type:application/json" -d '{"settings": {"index": {"number_of_shards": 4, "number_of_replicas": 2}}}' http://localhost:9200/ind-3
+```
+- список индексов и их статусов:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic curl http://localhost:9200/_cat/indices
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   177  100   177    0     0   3715      0 --:--:-- --:--:-- --:--:--  3765
+green  open ind-1 smi2JiCQS5q7PO_qxcOkyg 1 0 0 0 208b 208b
+yellow open ind-3 dRz4-2n2TAWSjP_zHzKB8w 4 2 0 0 832b 832b
+yellow open ind-2 WXowLmi0TSiG6IpIREtA8A 2 1 0 0 416b 416b
+```
+- состояние кластера `elasticsearch`:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic curl 'http://localhost:9200/_cluster/health'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   403  100   403    0     0  34184      0 --:--:-- --:--:-- --:--:-- 36636
+{
+"cluster_name":"elasticsearch",
+"status":"yellow",
+"timed_out":false,
+"number_of_nodes":1,
+"number_of_data_nodes":1,
+"active_primary_shards":7,
+"active_shards":7,
+"relocating_shards":0,
+"initializing_shards":0,
+"unassigned_shards":10,
+"delayed_unassigned_shards":0,
+"number_of_pending_tasks":0,
+"number_of_in_flight_fetch":0,
+"task_max_waiting_in_queue_millis":0,
+"active_shards_percent_as_number":41.17647058823529
+}
+```
+- почему часть индексов и кластер находится в состоянии yellow?
+
+Для данных индексов установлено количество реплик отличное от 0 (что подразумевает наличие других узлов не меньше этого значения), но узел в кластере сейчас только один.
+
+- удаляю все индексы:
+```
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic curl -X DELETE http://localhost:9200/ind-{1..3}
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    21  100    21    0     0    206      0 --:--:-- --:--:-- --:--:--   207
+100    21  100    21    0     0    274      0 --:--:-- --:--:-- --:--:--   274
+100    21  100    21    0     0    243      0 --:--:-- --:--:-- --:--:--   243
+{
+"acknowledged":true
+}
+dmitry@Lenovo-B50:~/netology/virt/06-db-5/src$ docker exec elastic curl 'http://localhost:9200/_cat/indices'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+```
 
 ## Задача 3
 
