@@ -44,7 +44,7 @@ RUN /bin/sh -c 'chown -R elastic /usr/src/elasticsearch/elasticsearch-7.10.2 && 
 EXPOSE 9200 9300
 ENTRYPOINT sudo -u elastic /usr/src/elasticsearch/elasticsearch-7.10.2/bin/elasticsearch
 ```
-- ссылка на образ в Dockerhub: 
+- ссылка на образ в Dockerhub: https://hub.docker.com/r/endlessoda/elastic_netology
 
 - создаём и запускаем контейнер:
 ```
