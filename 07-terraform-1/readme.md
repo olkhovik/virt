@@ -93,7 +93,7 @@ on linux_amd64
 или виртуальной машине.
 
 ---
-Для одновременного использования разных версий **Terraform** воспользовался [Terraform Switcher](Terraform Switcher):
+Для одновременного использования разных версий **Terraform** воспользовался [Terraform Switcher](https://github.com/warrensbox/terraform-switcher):
 
 - старая версия:
 ```
